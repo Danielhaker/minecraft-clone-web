@@ -2,18 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BlockWorld - Minecraft-like Game</title>
     <link rel="stylesheet" href="styles/game.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+    <div id="error-container" style="color: red; display: none;"></div>
     <div id="game-container"></div>
-    <div id="crosshair"></div>
-    <div id="info-panel">
-        <div id="coordinates"></div>
-        <div id="block-type"></div>
+    <div id="loading-screen">
+        <h1>BlockWorld</h1>
+        <p>Cargando...</p>
     </div>
 
     <script type="module" src="src/game.js"></script>
+    <script nomodule>
+        document.getElementById('error-container').innerHTML = 'Tu navegador no soporta módulos JavaScript. Por favor, actualízalo.';
+        document.getElementById('error-container').style.display = 'block';
+    </script>
 </body>
 </html>

@@ -3,6 +3,7 @@ import { PointerLockControls } from 'https://cdnjs.cloudflare.com/ajax/libs/thre
 
 class BlockWorld {
     constructor() {
+        console.log('Iniciando BlockWorld...');
         this.scene = null;
         this.camera = null;
         this.renderer = null;
@@ -14,19 +15,25 @@ class BlockWorld {
         this.initScene();
         this.createWorld();
         this.setupControls();
+        this.setupEventListeners();
         this.animate();
     }
 
     initScene() {
+        console.log('Inicializando escena...');
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x87CEEB);  // Sky blue
 
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0, 5, 10);
 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('game-container').appendChild(this.renderer.domElement);
+        try {
+            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('game-container').appendChild(this.renderer.domElement);
+        } catch (error) {
+            console.error('Error al crear renderer:', error);
+        }
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -40,6 +47,7 @@ class BlockWorld {
     }
 
     createWorld() {
+        console.log('Creando mundo...');
         const grassTexture = new THREE.TextureLoader().load('assets/textures/grass.png');
         const grassMaterial = new THREE.MeshStandardMaterial({ map: grassTexture });
 
@@ -59,15 +67,30 @@ class BlockWorld {
     }
 
     setupControls() {
-        this.controls = new PointerLockControls(this.camera, document.body);
-        this.scene.add(this.controls.getObject());
+        console.log('Configurando controles...');
+        try {
+            this.controls = new PointerLockControls(this.camera, document.body);
+            this.scene.add(this.controls.getObject());
+        } catch (error) {
+            console.error('Error al configurar controles:', error);
+        }
+    }
 
+    setupEventListeners() {
+        console.log('Configurando eventos...');
         document.getElementById('game-container').addEventListener('click', () => {
-            this.controls.lock();
+            try {
+                this.controls.lock();
+            } catch (error) {
+                console.error('Error al bloquear cursor:', error);
+            }
         });
+
+        window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
     onWindowResize() {
+        console.log('Ajustando tamaño de ventana...');
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -75,11 +98,19 @@ class BlockWorld {
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        this.renderer.render(this.scene, this.camera);
+        try {
+            this.renderer.render(this.scene, this.camera);
+        } catch (error) {
+            console.error('Error en renderizado:', error);
+        }
     }
 }
 
 // Iniciar juego cuando se carga la página
 window.addEventListener('load', () => {
-    new BlockWorld();
+    try {
+        new BlockWorld();
+    } catch (error) {
+        console.error('Error al iniciar BlockWorld:', error);
+    }
 });

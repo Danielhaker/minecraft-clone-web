@@ -1,6 +1,12 @@
-body, html {
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     font-family: Arial, sans-serif;
     background-color: #87CEEB;
@@ -8,8 +14,10 @@ body, html {
 
 #game-container {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     position: absolute;
+    top: 0;
+    left: 0;
 }
 
 #crosshair {
@@ -34,7 +42,35 @@ body, html {
     border-radius: 5px;
 }
 
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #87CEEB;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+}
+
+#error-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: red;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    z-index: 2000;
+}
+
 canvas {
     width: 100%;
     height: 100%;
+    display: block;
 }
