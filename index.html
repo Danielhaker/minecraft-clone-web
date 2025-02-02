@@ -8,10 +8,15 @@
 </head>
 <body>
     <div id="error-container" style="color: red; display: none;"></div>
+    <div id="debug-container" style="position: fixed; bottom: 0; left: 0; background: rgba(0,0,0,0.5); color: white; padding: 10px; z-index: 1000;">
+        <h3>Debug Information</h3>
+        <div id="debug-output"></div>
+    </div>
     <div id="game-container"></div>
     <div id="loading-screen">
         <h1>BlockWorld</h1>
         <p>Cargando...</p>
+        <div id="loading-details"></div>
     </div>
 
     <script type="module" src="src/game.js"></script>

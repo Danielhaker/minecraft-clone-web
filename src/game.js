@@ -1,96 +1,140 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import { PointerLockControls } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/PointerLockControls.js';
+import * as THREE from 'https://unpkg.com/three@0.137.0/build/three.module.js';
+import { PointerLockControls } from 'https://unpkg.com/three@0.137.0/examples/jsm/controls/PointerLockControls.js';
+
+function debugLog(message) {
+    console.log(`[BlockWorld Debug] ${message}`);
+    const debugElement = document.getElementById('debug-output');
+    if (debugElement) {
+        debugElement.innerHTML += `<p>${message}</p>`;
+    }
+}
 
 class BlockWorld {
     constructor() {
-        console.log('Iniciando BlockWorld...');
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.controls = null;
-        this.blocks = [];
-        this.blockSize = 1;
-        this.worldSize = 16;
+        debugLog('Iniciando BlockWorld...');
+        
+        // Verificar soporte de WebGL
+        if (!this.isWebGLSupported()) {
+            this.showError('Tu navegador no soporta WebGL');
+            return;
+        }
 
-        this.initScene();
-        this.createWorld();
-        this.setupControls();
-        this.setupEventListeners();
-        this.animate();
+        try {
+            this.initScene();
+            this.createWorld();
+            this.setupControls();
+            this.setupEventListeners();
+            this.animate();
+        } catch (error) {
+            this.showError(`Error de inicialización: ${error.message}`);
+            debugLog(`Error completo: ${error.stack}`);
+        }
+    }
+
+    isWebGLSupported() {
+        try {
+            const canvas = document.createElement('canvas');
+            return !!(window.WebGLRenderingContext && 
+                      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    showError(message) {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.innerHTML = `<p>${message}</p>`;
+            errorContainer.style.display = 'block';
+        }
+        console.error(message);
     }
 
     initScene() {
-        console.log('Inicializando escena...');
+        debugLog('Inicializando escena...');
+        
+        // Crear escena
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x87CEEB);  // Sky blue
 
+        // Configurar cámara
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0, 5, 10);
 
+        // Crear renderer con verificaciones
         try {
-            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true 
+            });
             this.renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('game-container').appendChild(this.renderer.domElement);
+            
+            const gameContainer = document.getElementById('game-container');
+            if (!gameContainer) {
+                throw new Error('Contenedor de juego no encontrado');
+            }
+            gameContainer.innerHTML = ''; // Limpiar contenedor
+            gameContainer.appendChild(this.renderer.domElement);
+            
+            debugLog('Renderer creado exitosamente');
         } catch (error) {
-            console.error('Error al crear renderer:', error);
+            this.showError(`Error al crear renderer: ${error.message}`);
+            throw error;
         }
 
-        // Lighting
+        // Iluminación
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         this.scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
         directionalLight.position.set(1, 1, 1);
         this.scene.add(directionalLight);
-
-        window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
     createWorld() {
-        console.log('Creando mundo...');
-        const grassTexture = new THREE.TextureLoader().load('assets/textures/grass.png');
-        const grassMaterial = new THREE.MeshStandardMaterial({ map: grassTexture });
+        debugLog('Creando mundo básico...');
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
 
-        for (let x = 0; x < this.worldSize; x++) {
-            for (let z = 0; z < this.worldSize; z++) {
-                const geometry = new THREE.BoxGeometry(this.blockSize, this.blockSize, this.blockSize);
-                const block = new THREE.Mesh(geometry, grassMaterial);
-                block.position.set(
-                    x * this.blockSize - (this.worldSize * this.blockSize) / 2,
-                    0,
-                    z * this.blockSize - (this.worldSize * this.blockSize) / 2
-                );
+        // Crear un suelo básico
+        for (let x = -5; x < 5; x++) {
+            for (let z = -5; z < 5; z++) {
+                const block = new THREE.Mesh(geometry, material);
+                block.position.set(x, 0, z);
                 this.scene.add(block);
-                this.blocks.push(block);
             }
         }
     }
 
     setupControls() {
-        console.log('Configurando controles...');
+        debugLog('Configurando controles...');
         try {
             this.controls = new PointerLockControls(this.camera, document.body);
             this.scene.add(this.controls.getObject());
         } catch (error) {
-            console.error('Error al configurar controles:', error);
+            this.showError(`Error al configurar controles: ${error.message}`);
         }
     }
 
     setupEventListeners() {
-        console.log('Configurando eventos...');
-        document.getElementById('game-container').addEventListener('click', () => {
-            try {
-                this.controls.lock();
-            } catch (error) {
-                console.error('Error al bloquear cursor:', error);
-            }
-        });
+        debugLog('Configurando eventos...');
+        const gameContainer = document.getElementById('game-container');
+        
+        if (gameContainer) {
+            gameContainer.addEventListener('click', () => {
+                try {
+                    this.controls.lock();
+                } catch (error) {
+                    this.showError(`Error al bloquear cursor: ${error.message}`);
+                }
+            });
+        }
 
         window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
     onWindowResize() {
-        console.log('Ajustando tamaño de ventana...');
+        debugLog('Ajustando tamaño de ventana...');
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -101,13 +145,14 @@ class BlockWorld {
         try {
             this.renderer.render(this.scene, this.camera);
         } catch (error) {
-            console.error('Error en renderizado:', error);
+            this.showError(`Error en renderizado: ${error.message}`);
         }
     }
 }
 
 // Iniciar juego cuando se carga la página
 window.addEventListener('load', () => {
+    debugLog('Página cargada, iniciando BlockWorld...');
     try {
         new BlockWorld();
     } catch (error) {
