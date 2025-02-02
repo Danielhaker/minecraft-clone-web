@@ -55,6 +55,24 @@ body, html {
     align-items: center;
     z-index: 1000;
     color: white;
+    opacity: 1;
+    transition: opacity 1s ease-out;
+}
+
+#loading-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+#loading-screen p, #loading-details {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 #error-container {

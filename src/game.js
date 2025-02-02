@@ -4,8 +4,14 @@ import { PointerLockControls } from 'https://unpkg.com/three@0.137.0/examples/js
 function debugLog(message) {
     console.log(`[BlockWorld Debug] ${message}`);
     const debugElement = document.getElementById('debug-output');
+    const loadingDetails = document.getElementById('loading-details');
+    
     if (debugElement) {
         debugElement.innerHTML += `<p>${message}</p>`;
+    }
+    
+    if (loadingDetails) {
+        loadingDetails.innerHTML = message;
     }
 }
 
@@ -19,12 +25,16 @@ class BlockWorld {
             return;
         }
 
+        // Preparar transición de pantalla de carga
+        this.setupLoadingScreen();
+
         try {
             this.initScene();
             this.createWorld();
             this.setupControls();
             this.setupEventListeners();
             this.animate();
+            this.hideLoadingScreen();
         } catch (error) {
             this.showError(`Error de inicialización: ${error.message}`);
             debugLog(`Error completo: ${error.stack}`);
@@ -48,6 +58,29 @@ class BlockWorld {
             errorContainer.style.display = 'block';
         }
         console.error(message);
+    }
+
+    setupLoadingScreen() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '1';
+            loadingScreen.style.display = 'flex';
+        }
+    }
+
+    hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loading-screen');
+        const gameContainer = document.getElementById('game-container');
+        
+        if (loadingScreen && gameContainer) {
+            loadingScreen.style.transition = 'opacity 1s ease-out';
+            loadingScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                gameContainer.style.cursor = 'none';  // Ocultar cursor
+            }, 1000);
+        }
     }
 
     initScene() {
